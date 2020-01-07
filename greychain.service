@@ -1,0 +1,31 @@
+[Unit]
+Description=Greychain Node
+After=syslog.target network.target
+
+[Service]
+Type=simple
+User=nobody
+Group=nobody
+WorkingDirectory=/opt/greychain
+ExecStart=python3 -u /opt/greychain/Server.py
+
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+DevicePolicy=closed
+ProtectSystem=full
+ProtectHome=True
+ProtectControlGroups=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+MemoryDenyWriteExecute=yes
+LockPersonality=yes
+
+ConditionSecurity=selinux
+
+[Install]
+WantedBy=multi-user.target

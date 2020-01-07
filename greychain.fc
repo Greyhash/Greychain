@@ -1,0 +1,2 @@
+/opt/greychain(/.*)?       gen_context(system_u:object_r:greychain_storage_t,s0)
+/opt/greychain/Server.py       gen_context(system_u:object_r:greychain_exec_t,s0)

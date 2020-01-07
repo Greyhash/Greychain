@@ -1,0 +1,86 @@
+module greychain 1.0;
+
+# Import types we do not define but will use in our policy
+require {
+  # Network related stuff
+  type ping_exec_t;
+  type http_port_t;
+#  type tcp_socket;
+  type syslogd_t;
+  type init_t;
+  type bin_t;
+
+  class file { manage_file_perms entrypoint map execute execute_no_trans };
+  class dir { manage_dir_perms };
+  class lnk_file { manage_lnk_file_perms };
+  class fifo_file { getattr read write append ioctl lock };
+  class chr_file { getattr open read lock ioctl };
+  
+  class process { transition sigchld };
+
+  class process2 { nnp_transition };
+  class tcp_socket { name_bind name_connect create ioctl read getattr write setattr append bind getopt setopt shutdown listen accept };
+  class fd { use };
+
+}
+
+# The domain which our apps will run as
+type greychain_t;
+
+# The context that is allowed to transition to our greychain_t context
+type greychain_exec_t;
+
+# Define the context our apps files will have under /local_disk
+type greychain_storage_t;
+
+# Make greychain_t a domain
+domain_type(greychain_t)
+
+# Allow procces started using files with greychain_exec_t context entry into the greychain_t domain
+domain_entry_file(greychain_t, greychain_exec_t)
+
+# Transition from the init (systemd) domain into the greychain_t domain if the started program has the filecontext greychain_exec_t
+init_daemon_domain(greychain_t, greychain_exec_t)
+allow init_t greychain_t:process2 nnp_transition;
+
+# Identify greychain_storage_t as a filecontext
+files_type(greychain_storage_t)
+
+# Allow sending logging to syslog
+logging_send_syslog_msg(greychain_t)
+
+# Allow read from /dev/urandom and /dev/random
+dev_read_rand(greychain_t)
+dev_read_urand(greychain_t)
+
+# Allow DNS
+auth_use_nsswitch(greychain_t)
+
+# Allow execute on ping
+#netutils_exec_ping(greychain_t)
+
+# Allow transition to the ping domain so we can use ping
+#netutils_domtrans_ping(greychain_t)
+
+# Allow systemd to execute our file
+#allow init_t greychain_exec_t:file { execute read open execute_no_trans };
+
+allow greychain_t bin_t:file map;
+allow greychain_t bin_t:file execute;
+#allow greychain_t httpd_config_t:dir search;
+
+# Allow syslog to read greychain_storage_t files
+allow syslogd_t greychain_storage_t:dir { manage_dir_perms };
+allow syslogd_t greychain_storage_t:file { manage_file_perms };
+allow syslogd_t greychain_storage_t:lnk_file { manage_lnk_file_perms };
+
+# Allow read and write to files and folders with the context greychain_storage_t nfs_t autofs_t
+allow greychain_t { greychain_storage_t } :dir { manage_dir_perms };
+allow greychain_t { greychain_storage_t } :file { manage_file_perms execute };
+allow greychain_t { greychain_storage_t } :lnk_file { manage_lnk_file_perms };
+#allow greychain_t { greychain_storage_t } :fifo_file { manage_fifo_file_perms };
+#allow greychain_t { greychain_storage_t } :sock_file { manage_sock_file_perms };
+
+# Allow connections and port bindings over tcp
+allow greychain_t { http_port_t } :tcp_socket { name_bind name_connect };
+allow greychain_t self : { tcp_socket } { connected_stream_socket_perms };
