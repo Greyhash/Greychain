@@ -106,8 +106,6 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         msg = None
         
-
-        
         # Handle download chain requests
         if self.path == "/download":
             msg = self.download_chain()
@@ -123,24 +121,14 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
 
     # POST requests begin here
     def do_POST(self):
-        data = self.is_valid_data()
-        if data is None:
+    	print ("dsf")
+    	data = self.is_valid_data()
+    	if data is None:
             self.send_json_response(401, json.dumps("Invalid post data").encode('utf-8'))
             return
         
         msg = None
-        if self.path == "/get_id_balance":
-            msg = self.get_id_balance(data)
-            
-        if self.path == "/get_sender_by_id":
-            msg = self.get_id_sender(data)
-            
-        if self.path == "/get_receiver_by_id":
-            msg = self.get_id_receiver(data)
-        #robin
-        if self.path == "/get_miner_by_id":
-            msg = self.get_miner_by_id(data)
-
+        
         # Handle new transaction
         if self.path == "/post_transaction":
             msg = self.post_transaction(data)
@@ -158,7 +146,7 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
             msg = self.post_node_list(data)
 
         if msg is None:
-            self.send_json_response(404, json.dumps("Not Found").encode('utf-8'))
+            self.send_json_response(404, json.dumps("Not Found"))
         else:
             self.send_json_response(200, msg)
 
@@ -175,93 +163,7 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
         data = self.blockchain.json().encode('utf-8')
         self.lock.release()
         return data
-    
-    def get_id_balance(self, data):
-        balance_id = Block.json_to_miner_blocks(data)
-        #obj = BlockChain()
-        #print(balance_id)
-        #sys.exit(0)
-        self.lock.acquire()
-        #data = obj.account_balance(balance_id)
 
-        data = str(self.blockchain.account_balance(balance_id))+"\n"
-        #print(data)
-        #data = str(data)+"\n"
-        return data.encode('utf-8')
-
-    
-    def get_id_receiver(self, data):
-        receiver_id = Block.json_to_miner_blocks(data)
-        self.lock.acquire()
-        receiver_list = []
-        counter = 0
-        
-        for block in self.blockchain:
-            if counter == 0:
-               counter += 1
-               continue
-               
-            if block.transactions[1].receiver == receiver_id:
-                receiver_list.append(block)
-
-        receiver_list = str(json.dumps(receiver_list, default=convert_to_dict, indent=4, sort_keys=True))
-        
-
-        data = receiver_list.encode('utf-8')
-        return data
-        
-        
-    def get_id_sender(self, data):
-        sender_id = Block.json_to_miner_blocks(data)
-        self.lock.acquire()
-        sender_list = []
-        counter = 0
-        
-        for block in self.blockchain:
-            if counter == 0:
-               counter += 1
-               continue
-               
-            if block.transactions[1].sender == sender_id:
-                sender_list.append(block)
-
-        sender_list = str(json.dumps(sender_list, default=convert_to_dict, indent=4, sort_keys=True))
-        
-
-        data = sender_list.encode('utf-8')
-        return data             
-
-    def get_miner_by_id(self, data):
-        miner_id = Block.json_to_miner_blocks(data)
-        self.lock.acquire()
-        miner_list = []
-        
-        counter = 0
-        
-        for block in self.blockchain:
-            if counter == 0:
-               counter += 1
-               continue
-            
-            #if block.transactions[0].receiver == "ea7f4d9b482f76d807093d18353593232e207e24f7de1850153cdef1ee204878":
-            
-            
-            if block.transactions[0].receiver == miner_id:
-                miner_list.append(block)
-
-            #miner_list.append(block.transactions[0].receiver)
-            
-            #if block["transactions"][0]["receiver"] = 
-            print(block.transactions[0].receiver)
-            
-        #print (miner_list)
-        miner_list = str(json.dumps(miner_list, default=convert_to_dict, indent=4, sort_keys=True))
-        #print (miner_list)
-        #sys.exit(0)
-        #data = str(miner_list)
-        data = miner_list.encode('utf-8')    
-        return data   
-    
     # Add the received block to our blockchain
     def post_block(self, data):
         block = Block.json_to_block(data)
@@ -283,6 +185,7 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
     # Also start to mine if we are not already mining
     # Since we have new transactions we need to mine a proof to create a new block for the transactions
     def post_transaction(self, data):
+        
         transaction = Transaction.json_to_transaction(data)
         if transaction is None:
             return b'{"Transaction accepted": false}'
@@ -429,7 +332,7 @@ def main(argv):
     RequestHandler.node_list = node_list # List of the nodes in the network including our own
     RequestHandler.public_key = public_key # Our public key
     RequestHandler.is_mining = [] # if our node is currently mining a new block
-    
+
     # Update the list of network nodes every 60 minutes
     Network.update_node_list(RequestHandler)
     

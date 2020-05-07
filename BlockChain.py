@@ -66,7 +66,8 @@ class BlockChain:
     # The current blockchain balance for an account 
     def account_balance(self, pub):
         b = 0.0
-        key = Key.pub_from_hex(pub)
+        #key = Key.pub_from_hex(pub)
+        key = pub
         
         for block in self.chain:
             for transaction in range(0, len(block.transactions)):

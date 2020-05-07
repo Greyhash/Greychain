@@ -62,6 +62,7 @@ def senders_has_funds(transactions, chain):
             continue
 
         acc_sum = chain.account_balance(transactions[t].sender)
+        #print("a" + str(acc_sum))
         if transactions[t].sender in block_amount:
             acc_sum += block_amount[transactions[t].sender]
         if acc_sum  < transactions[t].amount:
@@ -204,3 +205,6 @@ def json_to_transaction(data):
         return transaction
     except:
         return None
+def test_print(data):
+    print(data)
+    sys.exit(0)

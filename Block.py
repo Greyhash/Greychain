@@ -90,8 +90,19 @@ def json_to_block(data):
             signature = bytes.fromhex(data["transactions"][transaction]["signature"])
             t = Transaction.create(message, signature)
             block.add_transaction(t)
-        
+        print(data)
         return block
     except:
         return None
+        
+        
+def json_to_miner_blocks(data):
+    #try:
+    i = data["ID"]
+    #i = bytes.fromhex(data["ID"])
+    #print(type(i))
+    print(i)
+    return i
+    #except:
+        #return None
 
