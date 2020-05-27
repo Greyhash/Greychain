@@ -2,7 +2,7 @@
     "comment_hostname" :"Leave empty unless you only want the server to listen on a specific interface",
     "hostname": "",
     "port": 8008,
-    "protocol": "http",
+    "protocol": "https",
     "tls_cert": "./cert.pem",
     "tls_key": "./key.pem",
     "password": "change_me"

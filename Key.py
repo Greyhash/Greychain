@@ -38,6 +38,9 @@ def create(password, seed):
 
     priv = nacl.signing.SigningKey(h[0], encoder=nacl.encoding.HexEncoder)
     pub = priv.verify_key
+    #print("verify#########################")
+    #print(pub)
+    #print("##############################")
 
     return priv, pub
 
@@ -55,6 +58,10 @@ def verify_sign(pub, message, signature):
 
 def sign(priv, message):
     signed = priv.sign(message.encode('utf-8'))
+    #print("###################")
+    #print(signed)
+    #print("###################")
+    #sys.exit(0)
     return signed.message, signed.signature
 
 def store_key(path, key):

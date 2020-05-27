@@ -19,13 +19,19 @@ def download_chain():
         return f.read()
 
 def send_transaction():
-    message, signature = Key.sign(priv, "Pay,0.14," + Key.hex(pub) + "," + Key.hex(pub2) + "," + str(time.time()) + "," + "for the banana")
-    transaction = Transaction.create(message, signature)
+    try:
+        message, signature = Key.sign(priv, "Pay,0.14," + Key.hex(pub) + "," + Key.hex(pub3) + "," + str(time.time()) + "," + "for the banana")
+        transaction = Transaction.create(message, signature)
+            
+            
+        json_transaction = transaction.json().encode('utf-8')
+        req = urllib.request.Request(url=config["protocol"] + "://localhost:" + str(config["port"]) + "/post_transaction", data=json_transaction, method='POST')
+        with urllib.request.urlopen(req, timeout=5, context=ssl._create_unverified_context()) as f:
+            return f.read()
     
-    json_transaction = transaction.json().encode('utf-8')
-    req = urllib.request.Request(url=config["protocol"] + "://localhost:" + str(config["port"]) + "/post_transaction", data=json_transaction, method='POST')
-    with urllib.request.urlopen(req, timeout=5, context=ssl._create_unverified_context()) as f:
-        return f.read()
+    except NameError:
+        print("NameError")
+
 
 def send_false_transaction():
     message, signature = Key.sign(priv, "Pay_false,0.14," + Key.hex(pub) + "," + Key.hex(pub2) + "," + str(time.time()) + "," + "for the banana")
@@ -63,7 +69,8 @@ priv2, pub2 = Key.create("change_me2", seed2)
 tt = str(time.time())
 
 for x in range(0, 5):
-    data = download_chain()
+    #data = download_chain()
+    data = send_transaction()
     if debug:
         print ("Data from download:")
         print (data)
