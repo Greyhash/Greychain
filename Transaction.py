@@ -132,6 +132,10 @@ def verify(transactions, chain):
         m_receiver = message_part[3]
         m_time = message_part[4]
         m_comment = message_part[5]
+        
+        if m_sender == m_receiver:
+            print("Ignored transactions: Could not send transaction to receiver with the same id as sender")
+            return t
 
         try:
             if float(m_time) > time.time():
